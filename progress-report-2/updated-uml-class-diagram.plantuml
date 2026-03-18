@@ -1,0 +1,70 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Aircraft <<Abstract>> {
+  transponderIdent: String
+  transponderMode: String
+  trueAirSpeed: float
+  verticalSpeed: float
+  heading: float
+}
+
+class JohnsonAircraft {
+    tailIdentifier: String
+}
+
+class Intruder {
+}
+
+class DataMonitor {
+    enabled: bool
+}
+
+class Advisory {
+    type: AdvisoryType
+    targetVerticalSpeed: float
+    tauLimit: float
+}
+
+enum AdvisoryType {
+  Traffic_Advisory
+  Resolution_Advisory
+  Clear_Of_Conflict
+}
+
+enum Annunciator {
+    Climb
+    Descend
+    Level_Off
+    Maintain_Vertical_Speed
+}
+
+class Location {
+  float latitude
+  float longitude
+  float altitude
+}
+
+class Target {
+    relativeBearing: float
+    relativeRange: float
+    relativeAltitude: float
+    tau: float
+}
+
+note left of Target {
+    A target is a detected aircraft that has not yet been associated
+    with an advisory. It is any aircraft, other than the single
+    JohnsonAircraft, within the detection range of the TCAS-II system.
+}
+
+Aircraft <|-- JohnsonAircraft
+Aircraft <|-- Target
+Aircraft "1" -- "1" Location
+JohnsonAircraft  "1" *-- "1" DataMonitor
+DataMonitor o-- "0..*" Intruder
+Target <|-- Intruder
+Intruder "1" -- "1" Advisory
+Advisory "1" -- "0..1" Annunciator
+@enduml
+
