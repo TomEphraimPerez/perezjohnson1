@@ -1,0 +1,114 @@
+@startuml
+hide empty methods
+hide empty attributes
+
+Aircraft "1"  *-- "1" HomeSafe
+Aircraft "1" *-- "1" Altimeter
+Aircraft "1" *-- "1" LandingGear
+Aircraft "1" *-- "1" FuelSensor
+Aircraft "1" *-- "1" Aileron
+Aircraft "1" *-- "1" Brake
+Aircraft "1" *-- "1" Rudder
+Aircraft "1" *-- "1" Flaps
+Aircraft "1" *-- "0..1" Autopilot
+Aircraft "1" *-- "0..1" FlightDirector
+Aircraft "1" *-- "1" Elevator
+Aircraft "1" *-- "1" ACARS
+
+Sensor <|-- Altimeter
+Sensor <|-- FuelSensor
+Sensor <|-- GPSSensor
+
+HomeSafe -[dashed]-> Flaps: <<controls>>
+HomeSafe -[dashed]-> LandingGear: <<controls>>
+HomeSafe -[dashed]-> Rudder: <<controls>>
+HomeSafe -[dashed]-> Brake: <<controls>>
+HomeSafe -[dashed]-> Autopilot: <<controls>>
+HomeSafe -[dashed]-> FlightDirector: <<controls>>
+HomeSafe -[dashed]-> Aileron: <<controls>>
+HomeSafe -[dashed]-> Elevator: <<controls>>
+HomeSafe -[dashed]-> Altimeter: <<reads>>
+HomeSafe -[dashed]-> FuelSensor: <<reads>>
+HomeSafe -[dashed]-> CrewAlertSystem: <<notifies>
+HomeSafe -[dashed]-> GPSSensor: <<reads>>
+HomeSafe "1" -- "1" ACARS
+
+FlightManagementSystem <|-- Autopilot
+FlightManagementSystem <|-- FlightDirector
+
+class Aircraft {
+}
+
+abstract class Sensor {
+  updateFrequencyMs: int
+}
+
+class HomeSafe {
+  enabled: bool
+}
+
+class Altimeter {
+    altitude: float
+}
+
+class LandingGear {
+    deployRequested: bool
+    engaged: bool
+    lightEngaged: bool
+}
+
+class FuelSensor {
+    fuelLevel: int
+}
+
+class Aileron {
+  leftLevelRequested: float
+  leftLevelCurrent: float
+  rightLevelRequested: float
+  rightLevelCurrent: float
+}
+
+class Brake {
+  brakePressureRequested: float
+  brakePressureCurrent: float
+}
+
+class Rudder {
+  rudderAngleRequested: float
+  rudderAngleCurrent: float
+}
+
+class Flaps {
+  flapAngleRequested: float
+  flapAngleCurrent: float
+}
+
+class Elevator {
+  elevatorAngleRequested: float
+  elevatorAngleCurrent: float
+}
+
+class GPSSensor {
+  latitude: float
+  longitude: float
+}
+
+class ACARS {
+  messages: string[]
+}
+
+class CrewAlertSystem {
+  volume: int
+}
+
+
+abstract class FlightManagementSystem {
+}
+
+class Autopilot {
+}
+
+class FlightDirector {
+}
+
+@enduml
