@@ -1,0 +1,288 @@
+\documentclass[conference]{IEEEtran}
+% \IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{zed-csp}
+
+
+% Define a custom style for your callout
+\newtcolorbox{mycallout}{
+  colback=gray!10,     % 10% gray background
+  colframe=gray!50,    % 50% gray border
+  left=15pt,           % Left padding
+  right=15pt,          % Right padding
+  arc=0pt,             % Square corners (optional)
+  boxrule=0.5pt,       % Border thickness
+  enlarge left by=20pt, % The "Indentation"
+  width=\textwidth-20pt % Adjust width to account for indentation
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+
+\title{Term Project Progress Report 2\\
+CSCI 562: Formal Specifications\\ }
+
+\author{\IEEEauthorblockN{Scott Johnson}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{University of North Dakota}\\
+s.j.johnson@und.edu}
+\and
+\IEEEauthorblockN{Thomas Perez}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{University of North Dakota}\\
+thomas.perez@und.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+This is a project progress report for the term project for CSCI 562: Formal Specifications. This is the second of such reports and will detail the informal specifications agreed upon. An updated class diagram for the TCAS-II system will be an ongoing process. It is known that in today's U.S. Airspace, FAA rules have changed more rapidly than ever. As a quick sidebar: the reason for this is three-fold - 1) more planes in the air, 2) safety in all aspects of flight (including weather RADAR, intentional landings in zero-zero, collision avoidance, Class-G Airspace shrinking into Controlled Airspace), and 3) technology (including affordability). That said, knowing that TCAS-II is used by the vast majority of flights, (in the U.S.) Fairly simple FAA Rules will be briefly mentioned in at least one section of this Progress Report 2.
+\end{abstract}
+
+\section{Updated Class Diagram}
+Figure \ref{fig:1} shows the most recent class diagram for the TCAS-II system onboard an aircraft operated by the fictional ``JohnsonAir'' company. We specifically chose this name to distinguish between the aircraft under operation (i.e. the one in which the TCAS-II system under UML design, is installed) and other aircraft within the vicinity of this aircraft. There is more information later, regarding the requirements for TCAS-II mandates.
+
+Some notes about this diagram:
+\begin{itemize}
+    \item Every \texttt{Aircraft} is uniquely identified by its transponder ident. This ident is a 4-digit code (using numbers 0-7) that can change. The code may change as per usage or requirements of ATC's codes. \texttt{JohnsonAircraft}, like most General Aviation (GA) aircraft also has a unique immutable tail number for the life of the aircraft. According to ATC terminology, "aircraft ident" refers to the transponder squawk code, and "tail number" refers to the large painted alphanumeric characters on the tail, and/or the side of the aircraft, e.g., "N480DG", which is a Citation 500 series plane. ATC can also hail the PIC by firstly broadcasting the aircraft identifier (a la "tailnumber") as seen on their RADAR - "Flight 1930 Heavy" which is a large cargo transport airplane, or "Air Force One" which is any president's \textit{in-flight} aircraft. The latter two are of course not painted anywhere on the aircraft, as this is what is shown on ATC's RADAR display. The latter two examples are surrogate tail numbers.
+    \item Every \texttt{Aircraft} has a unique \texttt{Location} that identifies it, as well.
+    \item While within range of detection of the TCAS-II system onboard the \texttt{JohnsonAircraft} airplane, other \texttt{Aircraft} are tracked by the TCAS-II system as \texttt{Target}s until an \texttt{Advisory} is issued based on whether they are within the time-to-collision of the \texttt{JohnsonAircraft} airplane®. An \texttt{Intruder} object replaces the \texttt{Target} once an \texttt{Advisory} is issued.
+    \item One and only one \texttt{Advisory} can be active for a given \texttt{Intruder}.
+    \item Each \texttt{Advisory} has an \texttt{AdvisoryType}, which is one of three values: \texttt{Traffic\_Advisory}, \texttt{Resolution\_Advisory}, or \texttt{Clear\_Of\_Conflict}.
+    \item \texttt{Clear\_Of\_Conflict} is issued when one of the other \texttt{Advisory} objects is resolved, and lasts until the \texttt{Intruder} is replaced once more by a \texttt{Target}, at which point the \texttt{Advisory} is removed.\\
+
+    \item \textit{ADS-B/out must be discussed here, it is required in Class-B, Class-C, Class-D, and Class-E airspace when that airspace extends down to the surface, (except in some rural areas, not below 2000 AGL).}  \textit{This rule also applies to Class-E airspace at and above 10,000 MSL} (feet Mean Sea Level). These rules are in place because the airspace is becoming so dense, so fast.\\
+
+    \textit{TCAS-II is mandated for Part-91 (GA), Part-121 (scheduled flights), and Part-135 (on-demand) aircraft operations with more than ten passenger seats. TCAS-II requires a Mode-S transponders.}\\
+
+    Class G (uncontrolled) airspace, where FAA restrictions are fairly limited and ADS-B/out is not required, is becoming increasingly rare. For this reason, it is assumed that most all \texttt{Aircraft} are equipped with ADS-B/out and thus transmit their GPS coordinates (latitude and longitude).\\
+
+    \item   The \texttt{DataMonitor} is a singleton object that monitors the transponder data for potential collisions and creates one or more \texttt{Advisory} objects. Each individual \texttt{Advisory} object will be associated with exactly one \texttt{Intruder} object. There will exist only a single \texttt{DataMonitor} within the entire system and it will be either on (enabled) or off (disabled, likely overridden).
+
+    \item TCAS-II requires Mode-S transponders, of course. If the transponder however, is of Mode-C, then the \texttt{DataMonitor} will be disabled and no \texttt{Advisory} objects will be issued. \textit{If however, the \texttt{JohnsonAircraft} is equipped with TCAS-II, as it is assumed to be, but an intruder is Mode-C equipped, \texttt{JohnsonAircraft}'s TCAS-II can only annunciate "traffic" "traffic" "traffic"}. Since the system under UML design is a TCAS-II system, we assume that the equipped transponder of a \texttt{JohnsonAircraft} is always Mode-S.
+
+    \item TCAS-II does not provide lateral resolutions. Regarding vertical resolutions, the \texttt{targetVerticalSpeed} of an \texttt{Advisory} will be positive if the pilot is instructed to climb, negative if the pilot is instructed to descend, or annunciated "level off" if the pilot is instructed to level off. If the pilot is instructed to maintain vertical speed, the \texttt{targetVerticalSpeed} will be set to the same value as the \texttt{verticalSpeed} of the \texttt{Aircraft} at the hand of the pilot flying (PF).
+    \item tau is the ``time to close'', or effective time to collision, in seconds, assuming both aircraft maintain
+    current climb rate and speed.
+\end{itemize}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.8\textwidth]{classDiagram.png}
+    \caption{Updated requirements class diagram for the TCAS-II system}
+    \label{fig:1}
+\end{figure*}
+
+\section{Informal Specification}
+
+The following is a summary of the information specifications we have thus developed. This is given in a textual format, similar to a W3C specification. Some of this is duplicated as part of the requirements class diagram, above.
+
+\subsection{Introduction and General Notes}
+The Traffic Collision Avoidance System II (TCAS-II) is an aircraft in-cockpit
+system that is FAA-mandated in specific use-cases \cite{1,2,3} to mitigate in-flight collisions. This is possible on aircraft equipped with a Mode-S transponder, with and without ADS-B/out. The system monitors surrounding in-flight traffic using these transponder signals. When conflicts or potential conflicts are detected, TCAS-II will provide the crew with a ``traffic advisory'' or a ``resolution advisory'' to maintain aircraft separation in a timely and collision-free manner, with the most optimal passenger comfort level given the circumstances, and maneuvering as smoothly as possible. An aggressive evasive maneuver, however, may have to be performed by the pilot flying, in order to avoid a mid-air collision. \cite{8} is an FAA approved Technical Standard Order for TCAS-II annunciations. Also, (as will be explained later) according to \cite{8}, TCAS-II can and will also annunciate \textit{``traffic'', ``traffic'', ``traffic'', but only if an intruder is Mode-C equipped}. This is mentioned again, because of its importance to passenger safety.\\
+
+\subsection{Abbreviations}
+The following abbreviations are used in this document:
+\begin{itemize}
+\item A/C (or a/c): Aircraft
+\item ADS-B: Automatic Dependent Surveillance-Broadcast. It Depends on the airplane's avionics, especially its onboard GPS navigation system.
+\begin{itemize}
+    \item ADS-B/in: FIS-B, and TIS-B. I.e., Flight Information Service (weather and forecasts), and Traffic Information Service. Almost every aircraft currently supports ADS-B/in
+    \item ADS-B/out: Sends GPS position, altitude, a/s, heading and aircraft ident. (ADS-B/out does not replace the Mode-C transponder requirement; the aircraft must still have a Mode-C or Mode-S)
+\end{itemize}
+\item Alt: Altitude
+\item A/S, a/s: Horizontal airspeed
+\item ATC: Air traffic control. They must will be verbally notified if an RA or TA is imminent or has occurred. \cite{5} \cite{6} \cite{7}
+\item CFR: Actually ``14CFR'', i.e., Code of Federal Regulations - Title 14
+\item Deg: Bearing in degrees (0 - 359)
+\item GPS: Global Positioning System
+\item Ident: Aircraft's transponder squawk code identifier. (A 4 digit numeric code using the digits 0-7, inclusive)
+\item MFD: Multifunction display
+\item PF: Pilot flying
+\item PNF: Pilot not flying
+\item PFD: Primary flight display
+\item RA: Resolution advisory
+\item TA: Traffic advisory
+\item TSO C119-b: FAA approved Technical Standard Order \cite{8}
+\item VSI: Vertical speed indicator
+\end{itemize}
+
+\subsection{Inputs}
+The following items are assumed to be inputs to the TCAS-II system:
+\begin{itemize}
+\item Mode-S transponder data
+\item ADS-B signals
+\item Target GPS position
+\item Target Altitude
+\item Target Vertical Speed
+\item Target True Airspeed
+\item Intruder Maneuver Information, should a resolution be necessary
+\end{itemize}
+
+\subsection{Outputs}
+The TCAS-II system will output the following data according to \cite{8}:
+
+\begin{itemize}
+    \item Audible Signal indicating advisory type and Annunciation (if applicable). \textit{According to \cite{8}, there are only six annunciations possible in all TCAS-II systems. They are ``climb'', ``descend'', ``level-off'', ``maintain vertical speed'', ``clear of traffic'', and ``traffic traffic traffic'' but for Mode-C intruders only, only the latter}.
+    \item Visual Information, including RA visual commands, location of targets, and other symbols, indicate whether the target is climbing, descending, or leveling off.
+\end{itemize}
+
+\section{Formal Specification Development}
+Two iterations of the formal specification, in Z notation, are given in \ref{appendix1} and \ref{appendix2}.
+\ref{appendix1} has the initial schemas for the classes in the class diagram (but no constraints). \ref{appendix2}
+revises this to include multiplicity constraints and some operational constraints of the system.
+
+\section{Schedule and Progress}
+We are currently on schedule as per the Gantt chart indicated in progress report 1
+\footnote{Please see progress report 1 resubmission, included with the submission of this report.}.
+
+\subsection{Current Period Goals}
+The following task(s) have been completed during this review period:
+\begin{itemize}
+    \item Project Breakdown and Gantt Chart (S. Johnson)
+    \item Requirements UML Class Diagram (S. Johnson and T. Perez, jointly)
+    \item Project Progress Report I Resubmission (S. Johnson and T. Perez, jointly)
+    \item Project Progress Report II (S. Johnson and T. Perez, jointly)
+    \item Define Textual Specification (T. Perez, who is our subject matter expert on Pilot Regulations)
+    \item Definition of System Constraints (T. Perez)
+    \item Selection of formal notation and tool (S. Johnson, T. Perez, jointly). We chose Z notation in \LaTeX, using
+    \texttt{fuzz} as our checking tool.
+    \item Mapping of classes to schemas (S. Johnson, T. Perez, jointly)
+    \item Informal Specification Write-up (S. Johnson)
+    \item Initial Formal Specification in Z (S. Johnson)
+    \item Revised Formal Specification in Z (S. Johnson)
+\end{itemize}
+
+We have weekly meetings scheduled for Thursday afternoons. \textit{Should you desire to participate in one of these meetings, we ask you to email us to verify we haven't rescheduled it, but otherwise, you are welcome at the meeting.}
+
+\subsection{Next Period Goals}
+Unfortunately, we lost access to Monday, our Gantt charting tool. As a result, because the project took a bit of a
+different direction (the deadline for Progress Report 2 was extended, but two sets of formal specifications were added),
+our division of work was changed. Thus, the original Gantt chart from Progress Report 1 no longer applies. We are
+working on creating a new Gantt chart using the \texttt{Frappe Gantt} tool, an open source product, and will include
+this with Progress Report 3.
+We intend to complete the following tasks for the next review period:
+
+\begin{itemize}
+    \item Revise UML class diagram based on findings from Z notation and \texttt{fuzz} tool (S. Johnson and T. Perez,
+    jointly).
+    \item Find a method of re-rendering PlantUML diagrams directly in \LaTeX (S. Johnson).
+    \item First set of more formalized system constraints (S. Johnson and T. Perez, jointly).
+    \item Revise Gantt chart to be more accurate about work completed (S. Johnson).
+    \item Implement formal system constraints into Z logic set (S. Johnson, T. Perez, jointly).
+    \item Document problems encountered with \texttt{fuzz} so they can be reported in final report (T. Perez).
+    \item Translate MS Word template given by Dr. Grant into \LaTeX form (T. Perez).
+    \item Begin writing final report using Overleaf (S. Johnson and T. Perez, jointly).
+\end{itemize}
+
+\subsection{Issues and Blockers}
+\begin{itemize}
+    \item Papyrus was tried as a UML tool, but the design interface was non-intuitive. We used PlantUML, with VS Code integrations, to design the UML diagrams.
+    \item We would really like to be able to specify UML diagrams using some form of \LaTeX based rendering. In other words,
+    rather than simply importing a pre-rendered PNG into our \LaTeX document as we currently do, we would like to
+    specify the PlantUML in \LaTeX directly, and have it render as part of the rendering process inherent in document
+    generation. We may have to switch away from PlantUML to another tool to get this to work.
+    \item The tool being used to track the project is Monday, but our subscription trial has run out. We may look into using something else, such as Linear, Notion, or some other tool, to maintain the Gantt chart. Monday is relatively expensive, and somewhat overkill for this project. We could use some advice on another tool that the University has a subscription to.
+    \item S. Johnson is on travel from Mar 21-Mar 30 and again from April 20-24. He should have access to email during the second of these trips, but during the first, internet access will be spotty at best.
+    \item When originally designing the first specification, it was common for \texttt{fuzz} to report undefined
+    identifiers in schemas that utilized other schemas (e.g. \texttt{Aircraft}, which uses \texttt{Location}), if the
+    utilized schema was not declared before the utilizing schema. It took a bit to realize that the ordering of
+    declarations in Z matters.
+    \item When we added the numerical constraint for \texttt{Location}:
+        \[ \text{latitude} \geq -90 \land \text{latitude} \leq 90 \]
+        we encountered a type mismatch in \texttt{fuzz}. This occurs because the standard
+        Z toolkit defines the $\geq$ and $\leq$ relations strictly for integers ($\mathbb{Z}$).
+        Since \texttt{latitude} is defined as the given set \texttt{FLOAT}, the checker
+        does not recognize the comparison.
+
+        The error reported by \texttt{fuzz} is:
+    \begin{verbatim}
+    "specification-2.latex", line 27: Type mismatch
+    > Predicate: latitude \geq -90
+    > Arg type:  FLOAT
+    > Expected:  ZZ
+    \end{verbatim}
+
+    To resolve this, we took a pragmatic approach by simply redefining our units. For example, latitude will be
+    specified in millidegrees (instead of degrees), and this allows us to represent \texttt{FLOAT}(s) as integers.
+
+\end{itemize}
+
+\begin{thebibliography}{00}
+\bibitem{1}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-91 — General Operating and Flight Rules},
+Code of Federal Regulations.
+
+\bibitem{2}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-121 — Operating Requirements: Domestic, Flag, and Supplemental Operations},
+Code of Federal Regulations.
+
+\bibitem{3}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-135 — Operating Requirements: Commuter and On-Demand Operations},
+Code of Federal Regulations.
+
+\bibitem{4}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-71 — Designation of Class A, B, C, D, and E Airspace Areas; Air Traffic Service Routes; and Reporting Points, Code of Federal Regulations},
+Code of Federal Regulations.
+
+\bibitem{5}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-91.123 — General Operating and Flight Rules},
+Code of Federal Regulations.
+
+\bibitem{6}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-121.356 — Operating Requirements: Domestic, Flag, and Supplemental Operations},
+Code of Federal Regulations.
+
+\bibitem{7}
+U.S. Federal Aviation Administration,
+\textit{14 C.F.R. Part-135.19 and  Part-135.180 — Operating Requirements: Commuter and On-Demand Operations},
+Code of Federal Regulations.
+
+\bibitem{8} U.S. Federal Aviation Administration, Traffic Alert and Collision Avoidance System (TCAS) Airborne Equipment, TCAS II, TSO-C119b, Dec. 18, 1998.
+
+\end{thebibliography}
+
+\onecolumn
+
+% --- Appendix I ---
+\cleardoublepage
+\phantomsection
+\makeatletter
+\def\@currentlabel{Appendix I} % Sets what \ref returns
+\makeatother
+\label{appendix1}
+\section*{Appendix I \\ Z Formal Specification 1}
+\addcontentsline{toc}{section}{Appendix I: Z Formal Specification 1}
+
+\input{specification-1.latex}
+
+\clearpage
+
+% --- Appendix II ---
+\phantomsection
+\makeatletter
+\def\@currentlabel{Appendix II}
+\makeatother
+\label{appendix2}
+\section*{Appendix II \\ Z Formal Specification 2}
+\addcontentsline{toc}{section}{Appendix II: Z Formal Specification 2}
+
+\input{specification-2.latex}
+
+\end{document}

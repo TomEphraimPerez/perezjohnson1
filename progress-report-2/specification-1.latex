@@ -1,0 +1,62 @@
+This is the first set of formal specifications, without constraints. The initial version is simply to set up the
+schemas and axiom(s) required. It will be refined later to include multiplicities and logic constraints as we develop
+them.
+
+\begin{zed}
+[STRING, FLOAT]
+\end{zed}
+
+\begin{zed}
+BOOL ::= True | False
+\end{zed}
+
+\begin{zed}
+AdvisoryType ::= Traffic\_Advisory | Resolution\_Advisory | Clear\_Of\_Conflict
+\end{zed}
+
+\begin{zed}
+Annunciator ::= Climb | Descend | Level\_Off | Maintain\_Vertical\_Speed
+\end{zed}
+
+\begin{schema}{Location}
+  latitude: FLOAT\\
+  longitude: FLOAT\\
+  altitude: FLOAT
+\end{schema}
+
+\begin{schema}{Advisory}
+  type: AdvisoryType \\
+  targetVerticalSpeed: FLOAT \\
+  tauLimit: FLOAT \\
+  annunciator: \power Annunciator
+\end{schema}
+
+\begin{schema}{Aircraft}
+  transponderIdent, transponderMode: STRING \\
+  trueAirSpeed, verticalSpeed, heading: FLOAT \\
+  location: Location
+\end{schema}
+
+\begin{schema}{Target}
+  Aircraft \\
+  relativeBearing: FLOAT\\
+  relativeRange: FLOAT\\
+  relativeAltitude: FLOAT\\
+  tau: FLOAT
+\end{schema}
+
+\begin{schema}{Intruder}
+  Target\\
+  advisory: Advisory
+\end{schema}
+
+\begin{schema}{DataMonitor}
+  enabled: BOOL\\
+  intruders: \power Intruder
+\end{schema}
+
+\begin{schema}{JohnsonAircraft}
+  Aircraft \\
+  tailIdentifier: STRING \\
+  monitor: DataMonitor
+\end{schema}

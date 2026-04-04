@@ -40,9 +40,9 @@ enum Annunciator {
 }
 
 class Location {
-  float latitude
-  float longitude
-  float altitude
+  latitude: float
+  longitude: float
+  altitude: float
 }
 
 class Target {
@@ -67,4 +67,3 @@ Target <|-- Intruder
 Intruder "1" -- "1" Advisory
 Advisory "1" -- "0..1" Annunciator
 @enduml
-

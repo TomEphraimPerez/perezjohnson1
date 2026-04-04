@@ -1,0 +1,78 @@
+This is a revised version of the formal specification for the TCAS-II system. It includes constraints for multiplicities
+in the requirements class diagram and some constraints for the operation of the system. However, we have not yet
+included all constraints for valid operation of the system. It will be further revised as part of a future progress
+report.
+
+\begin{zed}
+[STRING]
+\end{zed}
+
+\begin{zed}
+BOOL ::= True | False
+\end{zed}
+
+\begin{zed}
+AdvisoryType ::= Traffic\_Advisory | Resolution\_Advisory | Clear\_Of\_Conflict
+\end{zed}
+
+\begin{zed}
+Annunciator ::= Climb | Descend | Level\_Off | Maintain\_Vertical\_Speed
+\end{zed}
+
+\begin{schema}{Location}
+  latitude: \num \\
+  longitude: \num\\
+  altitude: \num
+\where
+  latitude \geq -90000 \land latitude \leq 90000\\
+  longitude \geq -180000 \land longitude \leq 180000\\
+  altitude \geq 0 \land altitude \leq 127000
+\end{schema}
+
+\begin{schema}{Advisory}
+  type: AdvisoryType \\
+  targetVerticalSpeed: \num \\
+  tauLimit: \num \\
+  annunciator: \power Annunciator
+\where
+  \#annunciator \leq 1
+\end{schema}
+
+\begin{schema}{Aircraft}
+  transponderIdent, transponderMode: STRING \\
+  trueAirSpeed: \num \\
+  verticalSpeed: \num \\
+  heading: \num \\
+  location: Location
+\end{schema}
+
+\begin{schema}{Target}
+  Aircraft \\
+  relativeBearing: \num \\
+  relativeRange: \num \\
+  relativeAltitude: \num \\
+  tau: \num
+\end{schema}
+
+\begin{schema}{Intruder}
+  Target\\
+  advisory: Advisory
+\end{schema}
+
+\begin{schema}{DataMonitor}
+  enabled: BOOL\\
+  intruders: \power Intruder
+\end{schema}
+
+\begin{schema}{JohnsonAircraft}
+  Aircraft \\
+  tailIdentifier: STRING \\
+  monitor: DataMonitor
+\end{schema}
+
+% \begin{schema}{TCASState}
+%   ownship: JohnsonAircraft \\
+%   allTargets: \power Target
+% \where
+%   % Logic to ensure ownship isn't in the target set
+% \end{schema}
